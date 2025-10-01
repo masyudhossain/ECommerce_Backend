@@ -1,3 +1,5 @@
+// controllers/authController.js
+
 import asyncHandler from "express-async-handler";
 import User from "../models/user.model.js";
 import generateToken from "../utils/generateToken.js";

@@ -1,3 +1,5 @@
+// src/index.js  
+
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import asyncHandler from "express-async-handler";

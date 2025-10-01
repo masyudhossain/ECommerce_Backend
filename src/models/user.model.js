@@ -1,24 +1,61 @@
+// models/user.model.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { isPostalCode } from "validator";
 
 const addressSchema = new mongoose.Schema({
-    label: { type: String, required: true }, // e.g., Home, Work
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    zip: { type: String, required: true },
-    country: { type: String, required: true }
+    label: { type: String, required: [true, "Address label is required"] },
+    street: { type: String, required: [true, "Street is required"] },
+    city: { type: String, required: [true, "City is required"] },
+    state: { type: String, required: [true, "State is required"] },
+    zip: {
+        type: String,
+        required: [true, "ZIP code is required"],
+        validate: {
+            validator: function (v) {
+                return isPostalCode(v, this.country);
+            },
+            message: (props) => `${props.value} is not a valid postal code for ${props.instance.country}`,
+        },
+    },
+    country: { type: String, required: [true, "Country is required"] }
 }, {
     _id: false
 });
 
 const userSchema = new mongoose.Schema(
     {
-        name: { type: String, required: true },
-        email: { type: String, required: true, unique: true },
-        password: { type: String, required: true }, // Hashed password
-        role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
-        phone: { type: String },
+        name: {
+            type: String,
+            required: [true, "Name is required"],
+            minlength: [2, "Name must be at least 2 characters"],
+            maxlength: [50, "Name can be max 50 characters"],
+            trim: true,
+        },
+        email: {
+            type: String,
+            required: [true, "Email is required"],
+            unique: true,
+            lowercase: true,
+            validate: [validator.isEmail, "Please provide a valid email"],
+        },
+        password: {
+            type: String,
+            required: [true, "Password is required"],
+            minlength: [6, "Password must be at least 6 characters"],
+        },
+        role: {
+            type: String,
+            enum: ['customer', 'admin'],
+            default: 'customer'
+        },
+        phone: {
+            type: String,
+            validate: {
+                validator: (v) => !v || /^\+?\d{7,15}$/.test(v),
+                message: (props) => `${props.value} is not a valid phone number`,
+            },
+        },
         addresses: [addressSchema],
         wishlist: [
             {
