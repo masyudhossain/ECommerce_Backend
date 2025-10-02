@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import seedAdmin from "./seeder/adminSeeder.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import productRoutes from "./routes/productRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.get("/api/health", (req, res) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // 404 handler for unknown routes
 app.use(notFound);
