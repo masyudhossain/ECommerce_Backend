@@ -1,7 +1,7 @@
 // models/user.model.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import { isPostalCode } from "validator";
+import validator from "validator";
 
 const addressSchema = new mongoose.Schema({
     label: { type: String, required: [true, "Address label is required"] },
