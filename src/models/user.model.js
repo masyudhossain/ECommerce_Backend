@@ -13,9 +13,9 @@ const addressSchema = new mongoose.Schema({
         required: [true, "ZIP code is required"],
         validate: {
             validator: function (v) {
-                return isPostalCode(v, this.country);
+                return validator.isPostalCode(v, 'any');
             },
-            message: (props) => `${props.value} is not a valid postal code for ${props.instance.country}`,
+            message: (props) => `${props.value} is not a valid postal code`,
         },
     },
     country: { type: String, required: [true, "Country is required"] }
