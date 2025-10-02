@@ -8,14 +8,13 @@ const seedAdmin = async () => {
     const password = process.env.FIRST_ADMIN_PASSWORD;
 
     // Check if admin already exists
-    let admin = await User.findOne({ email, role: "admin" });
-    if (admin) {
-        console.log("Admin already exists:", email);
-        return; // Stop here — will not create again
+    const existingAdmin = await User.exists({ email, role: "admin" });
+    if (existingAdmin) {
+        return; // Admin exists, do nothing
     }
 
     // Create admin
-    admin = await User.create({
+    const admin = await User.create({
         name: "Super Admin",
         email,
         password,
