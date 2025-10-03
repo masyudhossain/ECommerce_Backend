@@ -46,10 +46,14 @@ export const registerUser = asyncHandler(async (req, res) => {
 // @access  Public
 export const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
+    const sessionId = req.cookies?.guest_session || req.headers["x-session-id"];
 
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+        if (sessionId) {
+            await mergeGuestCart(user._id, sessionId);
+        }
         res.json({
             _id: user._id,
             name: user.name,
