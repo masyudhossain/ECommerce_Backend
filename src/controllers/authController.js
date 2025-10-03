@@ -3,6 +3,7 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/user.model.js";
 import generateToken from "../utils/generateToken.js";
+import { mergeGuestCart } from "./cartController.js";
 
 // @desc    Register new user
 // @route   POST /api/auth/register

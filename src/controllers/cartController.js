@@ -8,8 +8,8 @@ import Product from "../models/product.model.js";
 // @route   GET /api/cart
 // @access  Public (guest) / Private (user)
 export const getCart = asyncHandler(async (req, res) => {
+    const userId = req.user?._id || null;
     const sessionId = req.cookies?.guest_session || req.headers["x-session-id"];
-    const userId = req.user?._id;
 
     if (userId) {
         // merge guest cart if exists
