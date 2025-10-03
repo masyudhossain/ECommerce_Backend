@@ -9,11 +9,16 @@ import seedAdmin from "./seeder/adminSeeder.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import productRoutes from "./routes/productRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import cookieParser from "cookie-parser";
+import { ensureSession } from "./middleware/sessionMiddleware.js";
+import cartRoutes from "./routes/cartRoutes.js";
 
 const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser());
+
 
 // Health Check
 app.get("/api/health", (req, res) => {
@@ -28,6 +33,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/cart", ensureSession, cartRoutes);
 
 // 404 handler for unknown routes
 app.use(notFound);
