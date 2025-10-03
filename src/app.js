@@ -12,6 +12,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import cookieParser from "cookie-parser";
 import { ensureSession } from "./middleware/sessionMiddleware.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import adminProductRoutes from "./routes/adminProductRoutes.js";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", ensureSession, cartRoutes);
+app.use("/api/admin/products", adminProductRoutes);
 
 // 404 handler for unknown routes
 app.use(notFound);
