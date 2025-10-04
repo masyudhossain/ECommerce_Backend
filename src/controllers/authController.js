@@ -9,7 +9,7 @@ import { mergeGuestCart } from "./cartController.js";
 // @route   POST /api/auth/register
 // @access  Public
 export const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, addresses } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -22,6 +22,7 @@ export const registerUser = asyncHandler(async (req, res) => {
         email,
         password,
         role: "customer",
+        addresses: Array.isArray(addresses) ? addresses : [], // default empty array if not provided
     });
 
     if (user) {
@@ -93,4 +94,66 @@ export const getUserProfile = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("User not found");
     }
+});
+
+// @desc    Get all users (admin only)
+// @route   GET /api/admin/users
+// @access  Private/Admin
+export const getAllUsers = asyncHandler(async (req, res) => {
+    const users = await User.find().select("-password"); // Exclude password
+    res.json(users);
+});
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+export const updateUserProfile = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    // Update fields if provided
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+
+    if (req.body.password) {
+        user.password = req.body.password; // will be hashed via pre-save middleware
+    }
+
+    if (req.body.addresses) {
+        user.addresses = req.body.addresses; // replace or merge as needed
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        addresses: updatedUser.addresses,
+        wishlist: updatedUser.wishlist,
+        createdAt: updatedUser.createdAt,
+        updatedAt: updatedUser.updatedAt,
+        token: generateToken(updatedUser._id), // refresh token
+    });
+});
+
+// @desc    Delete user account
+// @route   DELETE /api/auth/profile
+// @access  Private
+export const deleteUserAccount = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    await user.deleteOne(); // remove user from database
+
+    res.json({ message: "Your account has been deleted successfully" });
 });

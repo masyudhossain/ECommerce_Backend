@@ -7,14 +7,14 @@ import {
     removeFromCart,
     clearCart,
 } from "../controllers/cartController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { ensureSession } from "../middleware/sessionMiddleware.js";
 
 const router = express.Router();
 
 // Cart endpoints (protect optional)
-router.get("/", protect, getCart); // guest cart auto handled by session cookie
-router.post("/", protect, addToCart);
-router.delete("/:productId", protect, removeFromCart);
-router.delete("/", protect, clearCart);
+router.get("/", getCart); // guest cart auto handled by session cookie
+router.post("/", addToCart);
+router.delete("/:productId", removeFromCart);
+router.delete("/", clearCart);
 
 export default router;
