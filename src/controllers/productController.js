@@ -18,15 +18,38 @@ export const getProducts = asyncHandler(async (req, res) => {
 
     const query = {
         price: { $gte: minPrice, $lte: maxPrice },
-        name: { $regex: search, $options: "i" },
+        $or: [
+            { name: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+        ],
     };
 
-    if (category) query.category = category;
+    if (category) {
+        if (category.match(/^[0-9a-fA-F]{24}$/)) {
+            // If it's a valid ObjectId, use it directly
+            query.categoryId = category;
+        } else {
+            // If it's a name, find category by name
+            const cat = await Category.findOne({ name: { $regex: category, $options: "i" } });
+            if (cat) {
+                query.categoryId = cat._id;
+            } else {
+                return res.json({
+                    page,
+                    limit,
+                    total: 0,
+                    pages: 0,
+                    data: [],
+                });
+            }
+        }
+    }
 
     const total = await Product.countDocuments(query);
     const products = await Product.find(query)
         .skip(skip)
         .limit(limit)
+        .populate("category", "name")
         .select("-reviews -user") // exclude reviews for listing
         .sort({ createdAt: -1 });
 

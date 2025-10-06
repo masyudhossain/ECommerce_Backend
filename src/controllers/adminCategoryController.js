@@ -2,6 +2,7 @@
 
 import asyncHandler from "express-async-handler";
 import Category from "../models/category.model.js";
+import Product from "../models/product.model.js";
 
 // @desc    Create new category
 // @route   POST /api/admin/categories
@@ -51,6 +52,26 @@ export const deleteCategory = asyncHandler(async (req, res) => {
         throw new Error("Category not found");
     }
 
-    await category.remove();
-    res.json({ message: "Category removed" });
+    // Find products in this category
+    const productsInCategory = await Product.find({ category: category._id });
+
+    if (productsInCategory.length > 0) {
+        // Ensure "Uncategorized" exists
+        let uncategorized = await Category.findOne({ name: "Uncategorized" });
+        if (!uncategorized) {
+            uncategorized = await Category.create({ name: "Uncategorized" });
+            console.log('"Uncategorized" category created automatically during deletion');
+        }
+
+        // Reassign all products to "Uncategorized"
+        await Product.updateMany(
+            { category: category._id },
+            { $set: { category: uncategorized._id } }
+        );
+    }
+
+    await category.deleteOne();
+
+    res.json({ message: "Category deleted and products reassigned if needed" });
+
 });
