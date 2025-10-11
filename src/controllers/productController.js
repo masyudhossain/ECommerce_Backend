@@ -27,12 +27,12 @@ export const getProducts = asyncHandler(async (req, res) => {
     if (category) {
         if (category.match(/^[0-9a-fA-F]{24}$/)) {
             // If it's a valid ObjectId, use it directly
-            query.categoryId = category;
+            query.category = category;
         } else {
             // If it's a name, find category by name
             const cat = await Category.findOne({ name: { $regex: category, $options: "i" } });
             if (cat) {
-                query.categoryId = cat._id;
+                query.category = cat._id;
             } else {
                 return res.json({
                     page,
@@ -74,12 +74,4 @@ export const getProductById = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("Product not found");
     }
-});
-
-// @desc    Get all categories
-// @route   GET /api/categories
-// @access  Public
-export const getCategories = asyncHandler(async (req, res) => {
-    const categories = await Category.find().sort({ name: 1 });
-    res.json(categories);
 });
